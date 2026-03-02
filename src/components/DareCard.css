@@ -1,0 +1,61 @@
+.dare-card {
+    display: flex;
+    flex-direction: column;
+    padding: 24px;
+    height: 100%;
+    min-height: 200px;
+    text-decoration: none;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+
+.dare-card:hover {
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.dare-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.dare-category {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-secondary);
+    background: rgba(255, 255, 255, 0.05);
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+
+.dare-title {
+    font-size: 1.25rem;
+    margin-bottom: auto;
+    font-weight: 500;
+    line-height: 1.4;
+    color: var(--text-primary);
+}
+
+.dare-footer {
+    margin-top: 24px;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+/* Status variants */
+.status-not-started {
+    opacity: 0.8;
+    filter: grayscale(100%);
+}
+
+.status-in-progress {
+    border-left: 3px solid var(--accent-warning);
+}
+
+.status-completed {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(16, 185, 129, 0.02) 100%);
+    border-color: rgba(16, 185, 129, 0.2);
+}

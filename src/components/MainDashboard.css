@@ -1,0 +1,49 @@
+.dashboard-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.dashboard-header h1 {
+    font-size: 3rem;
+    margin-bottom: 8px;
+}
+
+.dashboard-subtitle {
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+}
+
+.filter-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 12px;
+    justify-content: center;
+    margin-bottom: 40px;
+    border-radius: var(--radius-full);
+}
+
+.filter-btn {
+    padding: 8px 16px;
+    border-radius: var(--radius-full);
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    transition: all var(--transition-fast);
+}
+
+.filter-btn:hover {
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.filter-btn.active {
+    background: var(--text-primary);
+    color: var(--bg-primary);
+    font-weight: 500;
+}
+
+.dares-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 24px;
+}
