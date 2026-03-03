@@ -1,15 +1,90 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { CalendarDays, ListTodo, ShieldCheck, Trophy } from 'lucide-react';
+import { CalendarDays, ListTodo, ShieldCheck, Trophy, ArrowUpDown } from 'lucide-react';
+import { DndContext, closestCorners, KeyboardSensor, PointerSensor, useSensor, useSensors, DragOverlay } from '@dnd-kit/core';
+import { sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 import { useDares } from '../DareContext';
+import { QuarterColumn } from './QuarterColumn';
+import { DraggableDareCard } from './DraggableDareCard';
 import './TimelinePlanner.css';
+
+const QUARTERS = [
+    { id: 'Q1', title: 'Q1: March - May' },
+    { id: 'Q2', title: 'Q2: June - Aug' },
+    { id: 'Q3', title: 'Q3: Sept - Nov' },
+    { id: 'Q4', title: 'Q4: Dec - Feb' }
+];
 
 export const TimelinePlanner = () => {
     const [activeTab, setActiveTab] = useState('year');
-    const { dares } = useDares();
+    const [activeDragDare, setActiveDragDare] = useState(null);
+    const { dares, updateDare } = useDares();
 
     const getDaresByStatus = (status) => dares.filter(d => d.status === status);
     const getDaresByType = (type) => dares.filter(d => d.type === type);
+
+    // Sort items by status: In Progress (0) -> Not Started (1) -> Completed (2)
+    const sortedDares = [...dares].sort((a, b) => {
+        const order = { 'In Progress': 0, 'Not Started': 1, 'Completed': 2 };
+        return order[a.status] - order[b.status];
+    });
+
+    const sensors = useSensors(
+        useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+        useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+    );
+
+    const handleDragStart = (event) => {
+        const { active } = event;
+        const dare = dares.find(d => d.id === active.id);
+        setActiveDragDare(dare);
+    };
+
+    const handleDragOver = (event) => {
+        const { active, over } = event;
+        if (!over) return;
+
+        const activeDare = dares.find(d => d.id === active.id);
+        const overId = over.id;
+
+        // Find the quarter we are hovering over (could be a column or an item in a column)
+        const overQuarterId = QUARTERS.find(q => q.id === overId) ? overId : dares.find(d => d.id === overId)?.quarter;
+
+        if (!overQuarterId) return;
+
+        if (activeDare.quarter !== overQuarterId) {
+            // We update during dragOver so the item snaps into the new column visually 
+            // and React re-renders it in the right SortableContext before we drop.
+            updateDare(activeDare.id, { quarter: overQuarterId });
+        }
+    };
+
+    const handleDragEnd = (event) => {
+        const { active, over } = event;
+        setActiveDragDare(null);
+
+        if (!over) return;
+
+        const activeDare = dares.find(d => d.id === active.id);
+        const overId = over.id;
+        const overQuarterId = QUARTERS.find(q => q.id === overId) ? overId : dares.find(d => d.id === overId)?.quarter;
+
+        if (overQuarterId && activeDare.quarter !== overQuarterId) {
+            updateDare(activeDare.id, { quarter: overQuarterId });
+        }
+    };
+
+    const handleSortAllByStatus = () => {
+        const confirmSort = window.confirm("This will organize all quarters so 'In Progress' items are at the top. Continue?");
+        if (confirmSort) {
+            const reordered = [...dares].sort((a, b) => {
+                const order = { 'In Progress': 0, 'Not Started': 1, 'Completed': 2 };
+                return order[a.status] - order[b.status];
+            });
+
+            reordered.forEach((dare) => updateDare(dare.id, { ...dare }));
+        }
+    };
 
     return (
         <div className="container timeline-container animate-fade-in">
@@ -41,21 +116,36 @@ export const TimelinePlanner = () => {
                 className="timeline-content"
             >
                 {activeTab === 'year' && (
-                    <div className="year-glance-grid">
-                        {['Q1: March - May', 'Q2: June - Aug', 'Q3: Sept - Nov', 'Q4: Dec - Feb'].map((q, i) => (
-                            <div key={q} className="quarter-column glass-panel">
-                                <h3>{q}</h3>
-                                <div className="quarter-dares">
-                                    {/* Mock distributing some tasks to quarters */}
-                                    {dares.slice(i * 10, i * 10 + 6).map(d => (
-                                        <div key={d.id} className="mini-dare-card">
-                                            <span className="mini-status" data-status={d.status}></span>
-                                            <span className="mini-title">{d.title.substring(0, 40)}...</span>
-                                        </div>
-                                    ))}
-                                </div>
+                    <div className="year-glance-wrapper">
+                        <div className="timeline-actions" style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '16px' }}>
+                            <button className="filter-btn active" onClick={handleSortAllByStatus} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <ArrowUpDown size={16} /> Sort by Status
+                            </button>
+                        </div>
+                        <DndContext
+                            sensors={sensors}
+                            collisionDetection={closestCorners}
+                            onDragStart={handleDragStart}
+                            onDragOver={handleDragOver}
+                            onDragEnd={handleDragEnd}
+                        >
+                            <div className="year-glance-grid">
+                                {QUARTERS.map(q => {
+                                    const colDares = sortedDares.filter(d => d.quarter === q.id && d.type !== 'recurring');
+                                    return (
+                                        <QuarterColumn
+                                            key={q.id}
+                                            id={q.id}
+                                            title={q.title}
+                                            dares={colDares}
+                                        />
+                                    );
+                                })}
                             </div>
-                        ))}
+                            <DragOverlay>
+                                {activeDragDare ? <DraggableDareCard dare={activeDragDare} /> : null}
+                            </DragOverlay>
+                        </DndContext>
                     </div>
                 )}
 

@@ -88,34 +88,50 @@
     padding-bottom: 12px;
 }
 
+.quarter-dares {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    min-height: 200px;
+}
+
 .mini-dare-card {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-md);
+    padding: 12px;
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 12px;
-    background: rgba(255, 255, 255, 0.03);
-    border-radius: var(--radius-sm);
-    margin-bottom: 12px;
-    font-size: 0.9rem;
+    transition: all var(--transition-fast);
+    touch-action: none;
 }
 
-.mini-status {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    flex-shrink: 0;
+.mini-dare-card:hover {
+    background: rgba(255, 255, 255, 0.08);
 }
 
-.mini-status[data-status="Completed"] {
-    background: var(--accent-success);
+.mini-dare-card.dragging {
+    opacity: 0.5;
+    background: rgba(var(--accent-primary-rgb), 0.2);
+    border-color: var(--accent-primary);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    z-index: 999;
 }
 
-.mini-status[data-status="In Progress"] {
-    background: var(--accent-warning);
+.quarter-column.drop-target {
+    border-color: rgba(var(--accent-primary-rgb), 0.5);
+    background: rgba(255, 255, 255, 0.05);
 }
 
-.mini-status[data-status="Not Started"] {
-    background: var(--text-muted);
+.empty-quarter-dropzone {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    pointer-events: none;
+    text-align: center;
+    padding: 24px 0;
+    font-style: italic;
+    opacity: 0.5;
 }
 
 /* Prep Phase */
